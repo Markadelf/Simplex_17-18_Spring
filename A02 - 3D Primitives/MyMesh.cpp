@@ -276,9 +276,18 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
 	// -------------------------------
+	vector3 top(0, a_fHeight / 2, 0);
+	vector3 bot(0, -a_fHeight / 2, 0);
+	double ang = 2 * std::_Pi / a_nSubdivisions;
 
+	for (size_t i = 0; i < a_nSubdivisions; i++)
+	{
+		vector3 a = bot + vector3(a_fRadius * std::sin(ang * i), 0, a_fRadius * std::cos(ang * i));
+		vector3 b = bot + vector3(a_fRadius * std::sin(ang * (i + 1)), 0, a_fRadius * std::cos(ang * (i + 1)));
+		AddTri(a, top, b);
+		AddTri(b, bot, a);
+	}
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
@@ -300,9 +309,21 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
 	// -------------------------------
+	vector3 top(0, a_fHeight / 2, 0);
+	vector3 bot(0, -a_fHeight / 2, 0);
+	double ang = 2 * std::_Pi / a_nSubdivisions;
 
+	for (size_t i = 0; i < a_nSubdivisions; i++)
+	{
+		vector3 a = bot + vector3(a_fRadius * std::sin(ang * i), 0, a_fRadius * std::cos(ang * i));
+		vector3 b = bot + vector3(a_fRadius * std::sin(ang * (i + 1)), 0, a_fRadius * std::cos(ang * (i + 1)));
+		vector3 c = top + vector3(a_fRadius * std::sin(ang * i), 0, a_fRadius * std::cos(ang * i));
+		vector3 d = top + vector3(a_fRadius * std::sin(ang * (i + 1)), 0, a_fRadius * std::cos(ang * (i + 1)));
+		AddTri(d, top, c);
+		AddTri(a, bot, b);
+		AddQuad(a, b, c, d);
+	}
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
@@ -330,13 +351,46 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+
+	vector3 top(0, a_fHeight / 2, 0);
+	vector3 bot(0, -a_fHeight / 2, 0);
+	double ang = 2 * std::_Pi / a_nSubdivisions;
+
+	for (size_t i = 0; i < a_nSubdivisions; i++)
+	{
+		vector3 a = bot + vector3(a_fOuterRadius * std::sin(ang * i), 0, a_fOuterRadius * std::cos(ang * i));
+		vector3 b = bot + vector3(a_fOuterRadius * std::sin(ang * (i + 1)), 0, a_fOuterRadius * std::cos(ang * (i + 1)));
+		vector3 c = top + vector3(a_fOuterRadius * std::sin(ang * i), 0, a_fOuterRadius * std::cos(ang * i));
+		vector3 d = top + vector3(a_fOuterRadius * std::sin(ang * (i + 1)), 0, a_fOuterRadius * std::cos(ang * (i + 1)));
+		
+		vector3 e = bot + vector3(a_fInnerRadius * std::sin(ang * i), 0, a_fInnerRadius * std::cos(ang * i));
+		vector3 f = bot + vector3(a_fInnerRadius * std::sin(ang * (i + 1)), 0, a_fInnerRadius * std::cos(ang * (i + 1)));
+		vector3 g = top + vector3(a_fInnerRadius * std::sin(ang * i), 0, a_fInnerRadius * std::cos(ang * i));
+		vector3 h = top + vector3(a_fInnerRadius * std::sin(ang * (i + 1)), 0, a_fInnerRadius * std::cos(ang * (i + 1)));
+		
+		AddQuad(a, b, c, d);
+		AddQuad(e, f, a, b);
+		AddQuad(c, d, g, h);
+		AddQuad(g, h, e, f);
+
+	}
+
 	// -------------------------------
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+
+vector3 SphereToCart(float radius, float theta, float phi) {
+	return vector3(
+		radius * std::sin(theta) * std::cos(phi),
+		radius * std::sin(theta) * std::sin(phi),
+		radius * std::cos(theta)
+	);
+}
+
+
 void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSubdivisionsA, int a_nSubdivisionsB, vector3 a_v3Color)
 {
 	if (a_fOuterRadius < 0.01f)
@@ -362,20 +416,50 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Init();
 
 	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
+	float focRad = (a_fOuterRadius + a_fInnerRadius) / 2;
+	float thickness = (a_fOuterRadius - a_fInnerRadius) / 2;
+	double angA = 2 * std::_Pi / a_nSubdivisionsA;
+	double angB = 2 * std::_Pi / a_nSubdivisionsB;
+
+	for (size_t i = 0; i < a_nSubdivisionsA; i++)
+	{
+		double p1 = i * angA;
+		double p2 = p1 + angA;
+		vector3 foc(focRad * std::cos(p1), focRad * std::sin(p1), 0);
+		vector3 foc2(focRad * std::cos(p2), focRad * std::sin(p2), 0);
+
+		for (size_t j = 0; j < a_nSubdivisionsB; j++)
+		{
+			double t1 = j * angB;
+			double t2 = t1 + angB;
+
+			vector3 a = foc + SphereToCart(thickness, t1, p1);
+			vector3 b = foc2 + SphereToCart(thickness, t1, p2);
+			vector3 c = foc + SphereToCart(thickness, t2, p1);
+			vector3 d = foc2 + SphereToCart(thickness, t2, p2);
+
+			AddQuad(c, d, a, b);
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
 	CompileOpenGL3X();
 }
+
+
+
+
+
+
 void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Color)
 {
 	if (a_fRadius < 0.01f)
 		a_fRadius = 0.01f;
 
 	//Sets minimum and maximum of subdivisions
-	if (a_nSubdivisions < 1)
+	if (a_nSubdivisions < 2)
 	{
 		GenerateCube(a_fRadius * 2.0f, a_v3Color);
 		return;
@@ -386,8 +470,28 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Release();
 	Init();
 
+
 	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	int sub = std::pow(2, a_nSubdivisions);
+	double ang = 2 * std::_Pi / sub;
+
+	for (size_t i = 0; i < sub; i++)
+	{
+		for (size_t j = 0; j < sub / 2; j++)
+		{
+			double p1 = i * ang;
+			double p2 = p1 + ang;
+			double t1 = j * ang;
+			double t2 = t1 + ang;
+
+			vector3 a = SphereToCart(a_fRadius, t1, p1);
+			vector3 b = SphereToCart(a_fRadius, t1, p2);
+			vector3 c = SphereToCart(a_fRadius, t2, p1);
+			vector3 d = SphereToCart(a_fRadius, t2, p2);
+
+			AddQuad(c, d, a, b);
+		}
+	}
 	// -------------------------------
 
 	// Adding information about color
