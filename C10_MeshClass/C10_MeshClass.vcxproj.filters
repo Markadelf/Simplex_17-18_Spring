@@ -86,7 +86,4 @@
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\C10_MeshClass_Lecture\C10_MeshClass_Lecture.vcxproj" />
-  </ItemGroup>
 </Project>

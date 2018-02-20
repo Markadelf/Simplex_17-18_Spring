@@ -51,6 +51,12 @@ void Application::Update(void)
 	//Is the first person camera active?
 	CameraRotation();
 }
+
+vector3 GetPos(float rad, float ang) {
+	return vector3(rad * cos(ang), rad * sin(ang), 0);
+}
+
+
 void Application::Display(void)
 {
 	// Clear the screen
@@ -69,8 +75,19 @@ void Application::Display(void)
 	{
 		m_pMeshMngr->AddMeshToRenderList(m_shapeList[i], glm::rotate(m4Offset, 90.0f, AXIS_X));
 
+		int div = i + 3;
+		static int rot = 0;
+		rot = (rot + 1) % 360;
+
+
+		int segSize = 360 / div;
+		float segRad = segSize * PI / 180;
+		int seg = rot / segSize;
+
 		//calculate the current position
-		vector3 v3CurrentPos = ZERO_V3;
+		vector3 v3CurrentPos = glm::lerp(GetPos((i + 1) / 2.f, seg * segRad), GetPos((i + 1) / 2.f, (seg + 1) * segRad), (rot % segSize) * 1.f / segSize);
+
+
 		matrix4 m4Model = glm::translate(m4Offset, v3CurrentPos);
 
 		//draw spheres

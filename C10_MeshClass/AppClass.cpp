@@ -3,7 +3,7 @@ void Application::InitVariables(void)
 {
 	//Make MyMesh object
 	m_pMesh = new MyMesh();
-	m_pMesh->GenerateCube(2.0f, C_BROWN);
+	m_pMesh->GenerateCube(1.0f, C_WHITE);
 
 	//Make MyMesh object
 	m_pMesh1 = new MyMesh();
@@ -25,9 +25,75 @@ void Application::Display(void)
 	// Clear the screen
 	ClearScreen();
 
-	m_pMesh->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), ToMatrix4(m_qArcBall));
-	m_pMesh1->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), glm::translate(vector3( 3.0f, 0.0f, 0.0f)));
-		
+	static float deg = 0;
+	std::vector<vector3> pixels;
+
+	pixels.push_back(vector3(-5, 0, 0));
+	pixels.push_back(vector3(-5, -1, 0));
+	pixels.push_back(vector3(-5, -2, 0));
+
+	pixels.push_back(vector3(-4, 0, 0));
+	pixels.push_back(vector3(-4, 1, 0));
+	
+	pixels.push_back(vector3(-3, 4, 0));
+
+	pixels.push_back(vector3(-3, 2, 0));
+	pixels.push_back(vector3(-3, 1, 0));
+	pixels.push_back(vector3(-3, 0, 0));
+	pixels.push_back(vector3(-3, -1, 0));
+	pixels.push_back(vector3(-3, -2, 0));
+
+	pixels.push_back(vector3(-2, 3, 0));
+	pixels.push_back(vector3(-2, 2, 0));
+	pixels.push_back(vector3(-2, 0, 0));
+	pixels.push_back(vector3(-2, -1, 0));
+	pixels.push_back(vector3(-2, -3, 0));
+
+	pixels.push_back(vector3(-1, 2, 0));
+	pixels.push_back(vector3(-1, 1, 0));
+	pixels.push_back(vector3(-1, 0, 0));
+	pixels.push_back(vector3(-1, -1, 0));
+	pixels.push_back(vector3(-1, -3, 0));
+
+	pixels.push_back(vector3(0, 1, 0));
+	pixels.push_back(vector3(0, 2, 0));
+	pixels.push_back(vector3(0, 0, 0));
+	pixels.push_back(vector3(0, -1, 0));
+
+	pixels.push_back(vector3(5, 0, 0));
+	pixels.push_back(vector3(5, -1, 0));
+	pixels.push_back(vector3(5, -2, 0));
+
+	pixels.push_back(vector3(4, 0, 0));
+	pixels.push_back(vector3(4, 1, 0));
+
+	pixels.push_back(vector3(3, 4, 0));
+
+	pixels.push_back(vector3(3, 2, 0));
+	pixels.push_back(vector3(3, 1, 0));
+	pixels.push_back(vector3(3, 0, 0));
+	pixels.push_back(vector3(3, -1, 0));
+	pixels.push_back(vector3(3, -2, 0));
+
+	pixels.push_back(vector3(2, 3, 0));
+	pixels.push_back(vector3(2, 2, 0));
+	pixels.push_back(vector3(2, 0, 0));
+	pixels.push_back(vector3(2, -1, 0));
+	pixels.push_back(vector3(2, -3, 0));
+
+	pixels.push_back(vector3(1, 2, 0));
+	pixels.push_back(vector3(1, 1, 0));
+	pixels.push_back(vector3(1, 0, 0));
+	pixels.push_back(vector3(1, -1, 0));
+	pixels.push_back(vector3(1, -3, 0));
+
+
+	for (size_t i = 0; i < pixels.size(); i++)
+	{
+		m_pMesh1->Render(m_pCameraMngr->GetProjectionMatrix(), m_pCameraMngr->GetViewMatrix(), glm::translate(vector3(deg, sin(deg), 0.0f)) * ToMatrix4(m_qArcBall) * glm::translate(pixels[i]));
+	}
+	deg += .1f;
+
 	// draw a skybox
 	m_pMeshMngr->AddSkyboxToRenderList();
 	

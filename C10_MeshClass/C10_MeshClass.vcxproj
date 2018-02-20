@@ -124,9 +124,6 @@ xcopy "$(SolutionDir)include\Simplex\Shaders" "$(SolutionDir)_Binary\Shaders" /y
   <ItemGroup>
     <ResourceCompile Include="..\res\BTO.rc" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\C10_MeshClass_Lecture\C10_MeshClass_Lecture.vcxproj" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
