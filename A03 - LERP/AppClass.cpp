@@ -2,7 +2,7 @@
 void Application::InitVariables(void)
 {
 	//Change this to your name and email
-	m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	m_sProgrammer = "Mark DelFavero - mxd5700@rit.edu";
 	
 	//Set the position and target of the camera
 	//(I'm at [0,0,10], looking at [0,0,0] and up is the positive Y axis)
@@ -38,6 +38,14 @@ void Application::InitVariables(void)
 		m_shapeList.push_back(m_pMeshMngr->GenerateTorus(fSize, fSize - 0.1f, 3, i, v3Color)); //generate a custom torus and add it to the meshmanager
 		fSize += 0.5f; //increment the size for the next orbit
 		uColor -= static_cast<uint>(decrements); //decrease the wavelength
+		std::vector<vector3> loop;
+		float radius = 1 + ((i - uSides) / 2.f) - .05f;
+		float segSize = 2 * PI / i;
+		for (size_t j = 0; j < i; j++)
+		{
+			loop.push_back(GetPos(radius, segSize * j));
+		}
+		pos.push_back(loop);
 	}
 }
 void Application::Update(void)
@@ -50,10 +58,12 @@ void Application::Update(void)
 
 	//Is the first person camera active?
 	CameraRotation();
+
+	my_time += .01f;
 }
 
 vector3 GetPos(float rad, float ang) {
-	return vector3(rad * cos(ang), rad * sin(ang), 0);
+	return vector3(rad * cos(ang), rad * sin(ang), .1f);
 }
 
 
@@ -75,17 +85,10 @@ void Application::Display(void)
 	{
 		m_pMeshMngr->AddMeshToRenderList(m_shapeList[i], glm::rotate(m4Offset, 90.0f, AXIS_X));
 
-		int div = i + 3;
-		static int rot = 0;
-		rot = (rot + 1) % 360;
-
-
-		int segSize = 360 / div;
-		float segRad = segSize * PI / 180;
-		int seg = rot / segSize;
+		
 
 		//calculate the current position
-		vector3 v3CurrentPos = glm::lerp(GetPos((i + 1) / 2.f, seg * segRad), GetPos((i + 1) / 2.f, (seg + 1) * segRad), (rot % segSize) * 1.f / segSize);
+		vector3 v3CurrentPos = glm::lerp(pos[i][((int)my_time) % pos[i].size()], pos[i][((int)my_time + 1) % pos[i].size()], my_time - ((int)my_time));
 
 
 		matrix4 m4Model = glm::translate(m4Offset, v3CurrentPos);

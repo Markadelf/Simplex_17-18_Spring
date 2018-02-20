@@ -45,6 +45,11 @@ private:
 	ControllerInput* m_pController[8]; //Controller
 	uint m_uActCont = 0; //Active Controller of the Application
 
+
+	//
+	float my_time;
+	std::vector<std::vector<vector3>> pos;
+
 public:
 #pragma region Constructor / Run / Destructor
 	/*
@@ -90,6 +95,7 @@ public:
 #pragma endregion
 
 private:
+
 #pragma region Initialization / Release
 	/*
 	USAGE: Initialize the window
@@ -320,6 +326,8 @@ private:
 	Application& operator=(Application const& input);
 #pragma endregion
 };
+//A helper function
+vector3 GetPos(float rad, float ang);
 
 #endif //__APPLICATIONCLASS_H_
 
