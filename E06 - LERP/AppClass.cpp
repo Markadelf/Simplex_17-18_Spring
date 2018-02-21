@@ -33,6 +33,7 @@ void Application::Update(void)
 	m_pSystem->Update();
 
 	//Is the arcball active?
+
 	ArcBall();
 
 	//Is the first person camera active?
@@ -54,12 +55,15 @@ void Application::Display(void)
 	//calculate the current position
 	vector3 v3CurrentPos;
 	
-
-
-
+	
 
 	//your code goes here
-	v3CurrentPos = vector3(0.0f, 0.0f, 0.0f);
+	int my_time = fTimer;
+	int pos1 = my_time % m_stopsList.size();
+	int pos2 = (my_time + 1) % m_stopsList.size();
+
+	v3CurrentPos = glm::lerp(m_stopsList[pos1], m_stopsList[pos2], fTimer - my_time);
+
 	//-------------------
 	
 
