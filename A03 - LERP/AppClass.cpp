@@ -38,13 +38,19 @@ void Application::InitVariables(void)
 		m_shapeList.push_back(m_pMeshMngr->GenerateTorus(fSize, fSize - 0.1f, 3, i, v3Color)); //generate a custom torus and add it to the meshmanager
 		fSize += 0.5f; //increment the size for the next orbit
 		uColor -= static_cast<uint>(decrements); //decrease the wavelength
+		
+		//Add a new vector to the vector of vectors giving the LERP coordinates
 		std::vector<vector3> loop;
+		//Get the radius
 		float radius = 1 + ((i - uSides) / 2.f) - .05f;
+		//Get the size of each segment
 		float segSize = 2 * PI / i;
 		for (size_t j = 0; j < i; j++)
 		{
+			//Add each position gotten from the low res circle
 			loop.push_back(GetPos(radius, segSize * j));
 		}
+		//Add the vector to the vector
 		pos.push_back(loop);
 	}
 }
@@ -59,11 +65,12 @@ void Application::Update(void)
 	//Is the first person camera active?
 	CameraRotation();
 
+	//Update the time
 	my_time += .01f;
 }
 
 vector3 GetPos(float rad, float ang) {
-	return vector3(rad * cos(ang), rad * sin(ang), .1f);
+	return vector3(rad * cos(ang), rad * sin(ang), 0.f);
 }
 
 

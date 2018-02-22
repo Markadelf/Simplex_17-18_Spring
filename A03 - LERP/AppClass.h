@@ -46,8 +46,10 @@ private:
 	uint m_uActCont = 0; //Active Controller of the Application
 
 
-	//
+	//My variables
+	//a float that represents the time
 	float my_time;
+	//the vector that holds the coordinates for each ring 	
 	std::vector<std::vector<vector3>> pos;
 
 public:
