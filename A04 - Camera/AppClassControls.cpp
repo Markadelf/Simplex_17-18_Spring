@@ -327,6 +327,12 @@ void Application::ArcBall(float a_fSensitivity)
 								   //return qArcBall; // return the new quaternion orientation
 }
 
+//Helper Function
+float Mag(vector3 vec) {
+	return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+}
+
+
 void Application::CameraRotation(float a_fSpeed)
 {
 	if (m_bFPC == false)
@@ -370,12 +376,20 @@ void Application::CameraRotation(float a_fSpeed)
 		fDeltaMouse = static_cast<float>(MouseY - CenterY);
 		fAngleX += fDeltaMouse * a_fSpeed;
 	}
+
+	//My Code
+	//Get the orientation from the camera
 	vector3 pos = m_pCamera->GetPosition();
 	vector3 direction = m_pCamera->GetTarget() - pos;
+	float mag = Mag(direction);
+	if (mag != 0)
+		direction = vector3(direction.x / mag, direction.y / mag, direction.z / mag);
 	vector3 right = vector3(-direction.z, 0, direction.x);
-	float mag = right.length();
-	right = vector3(right.x / mag, right.y / mag, right.z / mag);
+	mag = Mag(right);
+	if (mag != 0)
+		right = vector3(right.x / mag, right.y / mag, right.z / mag);
 
+	//Modify the directional data
 	direction = direction * glm::angleAxis(-fAngleY, vector3(0, 1, 0));
 	direction = direction * glm::angleAxis(fAngleX * 2, right);
 	
@@ -383,6 +397,7 @@ void Application::CameraRotation(float a_fSpeed)
 	m_pCamera->SetPosition(pos);
 	m_pCamera->SetTarget(pos + direction);
 	m_pCamera->SetUp(vector3(0, 1, 0));
+
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
 
@@ -400,12 +415,21 @@ void Application::ProcessKeyboard(void)
 
 	if (fMultiplier)
 		fSpeed *= 5.0f;
+
+
+	//My code
+	//Get the details about the orientation
 	vector3 pos = m_pCamera->GetPosition();
 	vector3 direction = m_pCamera->GetTarget() - pos;
+	float mag = Mag(direction);
+	if(mag != 0)
+		direction = vector3(direction.x / mag, direction.y / mag, direction.z / mag); 
 	vector3 right = vector3(-direction.z, 0, direction.x);
-	float mag = right.length();
-	right = vector3(right.x / mag, right.y / mag, right.z / mag);
-	vector2 vel;
+	mag = Mag(right);
+	if (mag != 0)
+		right = vector3(right.x / mag, right.y / mag, right.z / mag);
+	vector3 vel;
+	//Process the keyboard
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 		vel.y++;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
@@ -414,11 +438,17 @@ void Application::ProcessKeyboard(void)
 		vel.x--;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 		vel.x++;
-	mag = vel.length();
-	vel.x = vel.x / mag;
-	vel.y = vel.y / mag;
+	//Normalize the direction of motion
+	mag = Mag(vel);
+	if (mag != 0)
+	{
+		vel.x = vel.x / mag;
+		vel.y = vel.y / mag;
+	}
+	//Multiply by speed
 	vel *= fSpeed;
 
+	//Move the objects
 	m_pCamera->SetPosition(pos + direction * vel.y + right * vel.x);
 	m_pCamera->SetTarget(m_pCamera->GetPosition() + direction);
 
