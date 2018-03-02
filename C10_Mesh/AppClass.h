@@ -10,15 +10,14 @@ Date: 2017/05
 #include "ControllerConfiguration.h"
 #include "imgui\ImGuiObject.h"
 
-#include "MyMeshManager.h"
-namespace Simplex
-{
+#include "MyMesh.h"
 
 class Application
 {
-	MyCamera* m_pCamera = nullptr; //Camera class
-	MyMeshManager* m_pMyMeshMngr = nullptr; //My Mesh Manager
-	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu"; //Programmer
+	MyMesh* m_pMesh = nullptr;
+	MyMesh* m_pMesh1 = nullptr;
+
+	String m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
 private:
 	static ImGuiObject gui; //GUI object
 
@@ -40,7 +39,6 @@ private:
 	Simplex::CameraManager* m_pCameraMngr = nullptr; //Singleton for the camera manager
 	ControllerInput* m_pController[8]; //Controller
 	uint m_uActCont = 0; //Active Controller of the Application
-
 
 public:
 #pragma region Constructor / Run / Destructor
@@ -309,11 +307,9 @@ private:
 	OUTPUT: ---
 	*/
 	Application& operator=(Application const& input);
-	
+
 #pragma endregion
 };
-
-} //namespace simplex
 
 #endif //__APPLICATIONCLASS_H_
 

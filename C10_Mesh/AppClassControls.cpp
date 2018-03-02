@@ -1,6 +1,4 @@
 #include "AppClass.h"
-using namespace Simplex;
-
 //Mouse
 void Application::ProcessMouseMovement(sf::Event a_event)
 {
@@ -64,6 +62,7 @@ void Application::ProcessMouseScroll(sf::Event a_event)
 
 	if (fMultiplier)
 		fSpeed *= 2.0f;
+	m_pCameraMngr->MoveForward(-fSpeed);
 }
 //Keyboard
 void Application::ProcessKeyPressed(sf::Event a_event)
@@ -90,12 +89,20 @@ void Application::ProcessKeyReleased(sf::Event a_event)
 		m_bRunning = false;
 		break;
 	case sf::Keyboard::F1:
-		m_pCamera->SetPerspective();
-		m_pCamera->CalculateProjectionMatrix();
+		m_pCameraMngr->SetCameraMode(CAM_PERSP);
 		break;
 	case sf::Keyboard::F2:
-		m_pCamera->SetPerspective(false);
-		m_pCamera->CalculateProjectionMatrix();
+		m_pCameraMngr->SetCameraMode(CAM_ORTHO_Z);
+		break;
+	case sf::Keyboard::F3:
+		m_pCameraMngr->SetCameraMode(CAM_ORTHO_Y);
+		break;
+	case sf::Keyboard::F4:
+		m_pCameraMngr->SetCameraMode(CAM_ORTHO_X);
+		break;
+	case sf::Keyboard::F:
+		bFPSControl = !bFPSControl;
+		m_pCameraMngr->SetFPS(bFPSControl);
 		break;
 	case sf::Keyboard::Add:
 		++m_uActCont;
@@ -326,7 +333,6 @@ void Application::ArcBall(float a_fSensitivity)
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 								   //return qArcBall; // return the new quaternion orientation
 }
-
 void Application::CameraRotation(float a_fSpeed)
 {
 	if (m_bFPC == false)
@@ -370,22 +376,11 @@ void Application::CameraRotation(float a_fSpeed)
 		fDeltaMouse = static_cast<float>(MouseY - CenterY);
 		fAngleX += fDeltaMouse * a_fSpeed;
 	}
-	vector3 pos = m_pCamera->GetPosition();
-	vector3 direction = m_pCamera->GetTarget() - pos;
-	vector3 right = vector3(-direction.z, 0, direction.x);
-	float mag = right.length();
-	right = vector3(right.x / mag, right.y / mag, right.z / mag);
-
-	direction = direction * glm::angleAxis(-fAngleY, vector3(0, 1, 0));
-	direction = direction * glm::angleAxis(fAngleX, right);
-	
 	//Change the Yaw and the Pitch of the camera
-	m_pCamera->SetPosition(pos);
-	m_pCamera->SetTarget(pos + direction);
-	m_pCamera->SetUp(vector3(0, 1, 0));
+	m_pCameraMngr->ChangeYaw(fAngleY * 3.0f);
+	m_pCameraMngr->ChangePitch(-fAngleX * 3.0f);
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
-
 //Keyboard
 void Application::ProcessKeyboard(void)
 {
@@ -394,12 +389,30 @@ void Application::ProcessKeyboard(void)
 	for discreet on/off use ProcessKeyboardPressed/Released
 	*/
 #pragma region Camera Position
-	float fSpeed = 0.1f;
+	float fSpeed = 1.0f;
 	float fMultiplier = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
 		sf::Keyboard::isKeyPressed(sf::Keyboard::RShift);
 
 	if (fMultiplier)
 		fSpeed *= 5.0f;
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+		m_pCameraMngr->MoveForward(fSpeed);
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		m_pCameraMngr->MoveForward(-fSpeed);
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		m_pCameraMngr->MoveSideways(-fSpeed);
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		m_pCameraMngr->MoveSideways(fSpeed);
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+		m_pCameraMngr->MoveVertical(-fSpeed);
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+		m_pCameraMngr->MoveVertical(fSpeed);
 #pragma endregion
 }
 //Joystick
@@ -424,9 +437,15 @@ void Application::ProcessJoystick(void)
 		fHorizontalSpeed *= 3.0f;
 		fVerticalSpeed *= 3.0f;
 	}
+
+	m_pCameraMngr->MoveForward(fForwardSpeed);
+	m_pCameraMngr->MoveSideways(fHorizontalSpeed);
+	m_pCameraMngr->MoveVertical(fVerticalSpeed);
 #pragma endregion
 #pragma region Camera Orientation
 	//Change the Yaw and the Pitch of the camera
+	m_pCameraMngr->ChangeYaw(-m_pController[m_uActCont]->axis[SimplexAxis_U] / 150.0f);
+	m_pCameraMngr->ChangePitch(m_pController[m_uActCont]->axis[SimplexAxis_V] / 150.0f);
 #pragma endregion
 #pragma region ModelOrientation Orientation
 	m_qArcBall = quaternion(vector3(glm::radians(m_pController[m_uActCont]->axis[SimplexAxis_POVY] / 20.0f), 0.0f, 0.0f)) * m_qArcBall;
