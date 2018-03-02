@@ -377,7 +377,7 @@ void Application::CameraRotation(float a_fSpeed)
 	right = vector3(right.x / mag, right.y / mag, right.z / mag);
 
 	direction = direction * glm::angleAxis(-fAngleY, vector3(0, 1, 0));
-	direction = direction * glm::angleAxis(fAngleX, right);
+	direction = direction * glm::angleAxis(fAngleX * 2, right);
 	
 	//Change the Yaw and the Pitch of the camera
 	m_pCamera->SetPosition(pos);
@@ -400,6 +400,28 @@ void Application::ProcessKeyboard(void)
 
 	if (fMultiplier)
 		fSpeed *= 5.0f;
+	vector3 pos = m_pCamera->GetPosition();
+	vector3 direction = m_pCamera->GetTarget() - pos;
+	vector3 right = vector3(-direction.z, 0, direction.x);
+	float mag = right.length();
+	right = vector3(right.x / mag, right.y / mag, right.z / mag);
+	vector2 vel;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+		vel.y++;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		vel.y--;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		vel.x--;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		vel.x++;
+	mag = vel.length();
+	vel.x = vel.x / mag;
+	vel.y = vel.y / mag;
+	vel *= fSpeed;
+
+	m_pCamera->SetPosition(pos + direction * vel.y + right * vel.x);
+	m_pCamera->SetTarget(m_pCamera->GetPosition() + direction);
+
 #pragma endregion
 }
 //Joystick
