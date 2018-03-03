@@ -381,6 +381,7 @@ void Application::CameraRotation(float a_fSpeed)
 	//Get the orientation from the camera
 	vector3 pos = m_pCamera->GetPosition();
 	vector3 direction = m_pCamera->GetTarget() - pos;
+	vector3 ogDirection = direction;
 	float mag = Mag(direction);
 	if (mag != 0)
 		direction = vector3(direction.x / mag, direction.y / mag, direction.z / mag);
@@ -394,10 +395,15 @@ void Application::CameraRotation(float a_fSpeed)
 	direction = direction * glm::angleAxis(fAngleX * 2, right);
 	
 	//Change the Yaw and the Pitch of the camera
-	m_pCamera->SetPosition(pos);
-	m_pCamera->SetTarget(pos + direction);
+	//Make sure we don't cross the origin of the xz plane relative to the camera
+	//This is to prevent the camera from flipping out when you look straight up.
+	if (direction.x * ogDirection.x >= 0 || direction.z * ogDirection.z >= 0)
+		m_pCamera->SetTarget(pos + direction);
+	else {
+		//We still want the rotation around the y axis
+		m_pCamera->SetTarget(pos + ogDirection * glm::angleAxis(-fAngleY, vector3(0, 1, 0)));
+	}
 	m_pCamera->SetUp(vector3(0, 1, 0));
-
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
 
