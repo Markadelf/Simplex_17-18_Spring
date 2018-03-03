@@ -388,25 +388,30 @@ void Application::CameraRotation(float a_fSpeed)
 	float mag = Mag(direction);
 	if (mag != 0)
 		direction = vector3(direction.x / mag, direction.y / mag, direction.z / mag);
-	vector3 right = vector3(-direction.z, 0, direction.x);
+	vector3 right = m_pCamera->GetRight();
+	if (right.x == 0 && right.z == 0)
+		right = CrossProduct(direction, vector3(0, 1, 0));
 	mag = Mag(right);
 	if (mag != 0)
 		right = vector3(right.x / mag, right.y / mag, right.z / mag);
-
 	//Modify the directional data
 	direction = direction * glm::angleAxis(-fAngleY, vector3(0, 1, 0));
+	right = right * glm::angleAxis(-fAngleY, vector3(0, 1, 0));
 	direction = direction * glm::angleAxis(fAngleX, right);
 	
 	//Change the Yaw and the Pitch of the camera
 	//Make sure we don't cross the origin of the xz plane relative to the camera
 	//This is to prevent the camera from flipping out when you cross the center.
-	if (direction.x * ogDirection.x > 0 || direction.z * ogDirection.z > 0)
-		m_pCamera->SetTarget(pos + direction);
-	else {
-		//We still want the rotation around the y axis
-		m_pCamera->SetTarget(pos + ogDirection * glm::angleAxis(-fAngleY, vector3(0, 1, 0)));
+	if ((-CrossProduct(direction, right)).y < 0)
+	{
+		if(direction.y > 0)
+			direction = vector3(0, 1, 0);
+		else
+			direction = vector3(0, -1, 0);
 	}
+	m_pCamera->SetTarget(pos + direction);
 	m_pCamera->SetUp(-CrossProduct(direction, right));
+	m_pCamera->SetRight(right);
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
 
@@ -433,7 +438,7 @@ void Application::ProcessKeyboard(void)
 	float mag = Mag(direction);
 	if(mag != 0)
 		direction = vector3(direction.x / mag, direction.y / mag, direction.z / mag); 
-	vector3 right = vector3(-direction.z, 0, direction.x);
+	vector3 right = m_pCamera->GetRight();
 	mag = Mag(right);
 	if (mag != 0)
 		right = vector3(right.x / mag, right.y / mag, right.z / mag);

@@ -6,6 +6,10 @@ void Simplex::MyCamera::SetPosition(vector3 a_v3Position) { m_v3Position = a_v3P
 
 vector3 Simplex::MyCamera::GetPosition() { return m_v3Position; }
 
+void Simplex::MyCamera::SetRight(vector3 v_right) { m_v3right = v_right; }
+
+vector3 Simplex::MyCamera::GetRight() { return m_v3right; }
+
 void Simplex::MyCamera::SetTarget(vector3 a_v3Target) { m_v3Target = a_v3Target; }
 
 vector3 Simplex::MyCamera::GetTarget() { return m_v3Target; }
