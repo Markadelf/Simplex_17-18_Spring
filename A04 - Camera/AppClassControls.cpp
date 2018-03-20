@@ -388,7 +388,7 @@ void Application::CameraRotation(float a_fSpeed)
 	float mag = Mag(direction);
 	if (mag != 0)
 		direction = vector3(direction.x / mag, direction.y / mag, direction.z / mag);
-	vector3 right = m_pCamera->GetRight();
+	vector3 right = CrossProduct(direction, m_pCamera->GetUp());
 	if (right.x == 0 && right.z == 0)
 		right = CrossProduct(direction, vector3(0, 1, 0));
 	mag = Mag(right);
@@ -411,7 +411,6 @@ void Application::CameraRotation(float a_fSpeed)
 	}
 	m_pCamera->SetTarget(pos + direction);
 	m_pCamera->SetUp(-CrossProduct(direction, right));
-	m_pCamera->SetRight(right);
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }
 
@@ -438,7 +437,7 @@ void Application::ProcessKeyboard(void)
 	float mag = Mag(direction);
 	if(mag != 0)
 		direction = vector3(direction.x / mag, direction.y / mag, direction.z / mag); 
-	vector3 right = m_pCamera->GetRight();
+	vector3 right = CrossProduct(direction, m_pCamera->GetUp());
 	mag = Mag(right);
 	if (mag != 0)
 		right = vector3(right.x / mag, right.y / mag, right.z / mag);

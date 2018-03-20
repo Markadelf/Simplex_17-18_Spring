@@ -29,10 +29,6 @@ class MyCamera
 	matrix4 m_m4View; //View matrix
 	matrix4 m_m4Projection; //Projection Matrix
 
-	//My code
-	vector3 m_v3right;
-
-
 public:
 	/*
 	USAGE: Constructor
@@ -216,20 +212,6 @@ public:
 	OUTPUT: ---
 	*/
 	void CalculateProjectionMatrix(void);
-
-	/*
-	USAGE: Sets the position of the camera
-	ARGUMENTS: vector3 a_v3Up -> What up means in the world
-	OUTPUT: ---
-	*/
-	void SetRight(vector3 v3_right);
-
-	/*
-	USAGE: Gets the position of the camera
-	ARGUMENTS: ---
-	OUTPUT: position of the camera
-	*/
-	vector3 GetRight(void);
 
 };
 
