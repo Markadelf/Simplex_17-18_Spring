@@ -13,8 +13,21 @@ void Application::Display(void)
 #pragma endregion
 	//Your code goes here ---------------------------------------------------------
 	
-	m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu"; //Replace with your name and email
+	m_sProgrammer = "Mark DelFavero - mxd5700@rit.edu"; //Replace with your name and email
 	vector3 v3CurrentPos; //Initialize this variable accordingly
+
+						  //The static variable that tracks our position
+	static float pos = 0;
+	//Based on the position, place the object
+	v3CurrentPos = glm::lerp(m_v3StopList[(int)pos], m_v3StopList[((int)pos + 1) % m_v3StopList.size()], pos - ((int)pos));
+
+
+	//Move pos, but keep it constrained
+	pos += .01f;
+	if (pos >= m_v3StopList.size())
+		pos -= m_v3StopList.size();
+
+
 	matrix4 m4Model = glm::translate(IDENTITY_M4, v3CurrentPos) * ToMatrix4(m_qArcBall);
 	
 	

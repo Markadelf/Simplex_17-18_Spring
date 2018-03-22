@@ -20,10 +20,18 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	// Replace this with your code:
 	//-------------------------------------------------------------------
 
+	vector3 top(a_fHeight, 0, 0);
+	vector3 bot(0, 0, 0);
+	//Angle based on divs
+	float ang = PI * 2 / a_nSubdivisions;
 
 
-	GenerateCube(a_fRadius, C_RED); //Remember AddTri and AddVertexPosition are your friends. 
-
+	for (size_t i = 0; i < a_nSubdivisions; i++)
+	{
+		//Add the tris for the side
+		AddTri(bot, bot + a_fRadius * vector3(0, cos((i + 1) * ang), sin((i + 1) * ang)), bot + a_fRadius * vector3(0, cos(i * ang), sin(i * ang)));
+		AddTri(top, bot + a_fRadius * vector3(0, cos((i) * ang), sin(i * ang)), bot + a_fRadius * vector3( 0,cos((i + 1) * ang), sin((i + 1) * ang)));
+	}
 
 
 	//-------------------------------------------------------------------
