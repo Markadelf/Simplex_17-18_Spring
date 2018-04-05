@@ -230,10 +230,13 @@ bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 	bool bColliding = (glm::distance(GetCenterGlobal(), a_pOther->GetCenterGlobal()) < m_fRadius + a_pOther->m_fRadius);
 	
 	//if they are colliding check the SAT
-	if (bColliding)
+	//if (bColliding)
 	{
 		if(SAT(a_pOther) != eSATResults::SAT_NONE)
 			bColliding = false;// reset to false
+		else {
+			bColliding = true;
+		}
 	}
 
 	if (bColliding) //they are colliding
@@ -274,6 +277,13 @@ void MyRigidBody::AddToRenderList(void)
 	}
 }
 
+//Helper Function
+float Mag(vector3 vec) {
+	return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+}
+vector3 CrossProduct(vector3 a, vector3 b) {
+	return vector3(a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y);
+}
 uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 {
 	/*
@@ -286,6 +296,83 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	Simplex that might help you [eSATResults] feel free to use it.
 	(eSATResults::SAT_NONE has a value of 0)
 	*/
+
+
+	std::vector<vector3> axis;
+	axis.push_back(vector3(m_m4ToWorld * vector4(1, 0, 0, 0)));
+	axis.push_back(vector3(m_m4ToWorld * vector4(0, 1, 0, 0)));
+	axis.push_back(vector3(m_m4ToWorld * vector4(0, 0, 1, 0)));
+	axis.push_back(vector3(a_pOther->m_m4ToWorld * vector4(1, 0, 0, 0)));3
+	axis.push_back(vector3(a_pOther->m_m4ToWorld * vector4(0, 1, 0, 0)));
+	axis.push_back(vector3(a_pOther->m_m4ToWorld * vector4(0, 0, 1, 0)));
+	for (size_t i = 0; i < 3; i++)
+	{
+		for (size_t j = 3; j < 6; j++)
+		{
+			vector3 ax = CrossProduct(axis[i], axis[j]);
+			ax = ax / Mag(ax);
+			axis.push_back(ax);
+		}
+	}
+
+	std::vector<vector3> a;
+	//Back square
+	a.push_back(m_v3MinL);
+	a.push_back(vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MinL.z));
+	a.push_back(vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MinL.z));
+	a.push_back(vector3(m_v3MaxL.x, m_v3MaxL.y, m_v3MinL.z));
+	//Front square
+	a.push_back(vector3(m_v3MinL.x, m_v3MinL.y, m_v3MaxL.z));
+	a.push_back(vector3(m_v3MaxL.x, m_v3MinL.y, m_v3MaxL.z));
+	a.push_back(vector3(m_v3MinL.x, m_v3MaxL.y, m_v3MaxL.z));
+	a.push_back(m_v3MaxL);
+	
+	std::vector<vector3> b;
+	b.push_back(a_pOther->m_v3MinL);
+	b.push_back(vector3(a_pOther->m_v3MaxL.x, a_pOther->m_v3MinL.y, a_pOther->m_v3MinL.z));
+	b.push_back(vector3(a_pOther->m_v3MinL.x, a_pOther->m_v3MaxL.y, a_pOther->m_v3MinL.z));
+	b.push_back(vector3(a_pOther->m_v3MaxL.x, a_pOther->m_v3MaxL.y, a_pOther->m_v3MinL.z));
+	//Front square
+	b.push_back(vector3(a_pOther->m_v3MinL.x, a_pOther->m_v3MinL.y, a_pOther->m_v3MaxL.z));
+	b.push_back(vector3(a_pOther->m_v3MaxL.x, a_pOther->m_v3MinL.y, a_pOther->m_v3MaxL.z));
+	b.push_back(vector3(a_pOther->m_v3MinL.x, a_pOther->m_v3MaxL.y, a_pOther->m_v3MaxL.z));
+	b.push_back(a_pOther->m_v3MaxL);
+	
+	for (size_t i = 0; i < 8; i++)
+	{
+		a[i] = vector3(m_m4ToWorld * vector4(a[i], 1));
+		b[i] = vector3(a_pOther->m_m4ToWorld * vector4(b[i], 1));
+	}
+
+	for (size_t i = 0; i < axis.size(); i++)
+	{
+		float aMin = a[0].x * axis[i].x + a[0].y * axis[i].y + a[0].z * axis[i].z;
+		float aMax = a[0].x * axis[i].x + a[0].y * axis[i].y + a[0].z * axis[i].z;
+		float bMin = b[0].x * axis[i].x + b[0].y * axis[i].y + b[0].z * axis[i].z;
+		float bMax = b[0].x * axis[i].x + b[0].y * axis[i].y + b[0].z * axis[i].z;
+		for (size_t j = 1; j < a.size(); j++)
+		{
+			float local = a[j].x * axis[i].x + a[j].y * axis[i].y + a[j].z * axis[i].z;
+			if (local < aMin)
+				aMin = local;
+			if (local > aMax)
+				aMax = local;
+		}
+		for (size_t j = 1; j < b.size(); j++)
+		{
+			float local = b[j].x * axis[i].x + b[j].y * axis[i].y + b[j].z * axis[i].z;
+			if (local < bMin)
+				bMin = local;
+			if (local > bMax)
+				bMax = local;
+		}
+
+		if (aMax < bMin || aMin > bMax)
+			return (eSATResults) (i + 1);
+
+	}
+
+
 
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
