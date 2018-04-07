@@ -230,13 +230,10 @@ bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 	bool bColliding = (glm::distance(GetCenterGlobal(), a_pOther->GetCenterGlobal()) < m_fRadius + a_pOther->m_fRadius);
 	
 	//if they are colliding check the SAT
-	//if (bColliding)
+	if (bColliding)
 	{
 		if(SAT(a_pOther) != eSATResults::SAT_NONE)
 			bColliding = false;// reset to false
-		else {
-			bColliding = true;
-		}
 	}
 
 	if (bColliding) //they are colliding
@@ -286,25 +283,15 @@ vector3 CrossProduct(vector3 a, vector3 b) {
 }
 uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 {
-	/*
-	Your code goes here instead of this comment;
-
-	For this method, if there is an axis that separates the two objects
-	then the return will be different than 0; 1 for any separating axis
-	is ok if you are not going for the extra credit, if you could not
-	find a separating axis you need to return 0, there is an enum in
-	Simplex that might help you [eSATResults] feel free to use it.
-	(eSATResults::SAT_NONE has a value of 0)
-	*/
-
-
+	//Make a list of all the axis
 	std::vector<vector3> axis;
 	axis.push_back(vector3(m_m4ToWorld * vector4(1, 0, 0, 0)));
 	axis.push_back(vector3(m_m4ToWorld * vector4(0, 1, 0, 0)));
 	axis.push_back(vector3(m_m4ToWorld * vector4(0, 0, 1, 0)));
-	axis.push_back(vector3(a_pOther->m_m4ToWorld * vector4(1, 0, 0, 0)));3
+	axis.push_back(vector3(a_pOther->m_m4ToWorld * vector4(1, 0, 0, 0)));
 	axis.push_back(vector3(a_pOther->m_m4ToWorld * vector4(0, 1, 0, 0)));
 	axis.push_back(vector3(a_pOther->m_m4ToWorld * vector4(0, 0, 1, 0)));
+	//Use the basic axis to generate the crossproduct ones
 	for (size_t i = 0; i < 3; i++)
 	{
 		for (size_t j = 3; j < 6; j++)
@@ -315,6 +302,7 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 		}
 	}
 
+	//Generate the corners of each model in local space
 	std::vector<vector3> a;
 	//Back square
 	a.push_back(m_v3MinL);
@@ -338,14 +326,17 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	b.push_back(vector3(a_pOther->m_v3MinL.x, a_pOther->m_v3MaxL.y, a_pOther->m_v3MaxL.z));
 	b.push_back(a_pOther->m_v3MaxL);
 	
+	//Put them in world space
 	for (size_t i = 0; i < 8; i++)
 	{
 		a[i] = vector3(m_m4ToWorld * vector4(a[i], 1));
 		b[i] = vector3(a_pOther->m_m4ToWorld * vector4(b[i], 1));
 	}
 
+	//Check each axis for a degree of seperation
 	for (size_t i = 0; i < axis.size(); i++)
 	{
+		//Get the minimums and maximums after the projection to one dimensional space
 		float aMin = a[0].x * axis[i].x + a[0].y * axis[i].y + a[0].z * axis[i].z;
 		float aMax = a[0].x * axis[i].x + a[0].y * axis[i].y + a[0].z * axis[i].z;
 		float bMin = b[0].x * axis[i].x + b[0].y * axis[i].y + b[0].z * axis[i].z;
@@ -366,13 +357,11 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 			if (local > bMax)
 				bMax = local;
 		}
-
+		//Check for the degree of seperation
 		if (aMax < bMin || aMin > bMax)
-			return (eSATResults) (i + 1);
+			return (eSATResults) (i + 1); //Because of how the vector is set up, i + 1 will always result in the proper enum
 
 	}
-
-
 
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
