@@ -6,13 +6,22 @@ Date: 2017/07
 #define __MyENTITYMANAGER_H_
 
 #include "MyEntity.h"
-
+#include "Octree.h"
 namespace Simplex
 {
 
 //System Class
 class MyEntityManager
 {
+	//Mine
+	Octree tree;
+	bool _useOct;
+public:
+	Octree GetOctree();
+	bool GetUseOct();
+	void SetUseOct(bool val);
+	//Old
+private:
 	typedef MyEntity* PEntity; //MyEntity Pointer
 	uint m_uEntityCount = 0; //number of elements in the list
 	PEntity* m_mEntityArray = nullptr; //array of MyEntity pointers

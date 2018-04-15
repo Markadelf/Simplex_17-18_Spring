@@ -29,7 +29,7 @@ void Application::InitVariables(void)
 			m_pEntityMngr->SetModelMatrix(m4Position);
 		}
 	}
-	m_uOctantLevels = 1;
+	m_uOctantLevels = OctreeAddress::depth;
 	m_pEntityMngr->Update();
 }
 void Application::Update(void)
@@ -42,6 +42,16 @@ void Application::Update(void)
 
 	//Is the first person camera active?
 	CameraRotation();
+
+	if (m_uOctantLevels >= OctreeAddress::depth || m_uOctantLevels == 1)
+	{
+		m_uOctantLevels = OctreeAddress::depth;
+		m_pEntityMngr->SetUseOct(true);
+	}
+	else {
+		m_uOctantLevels = 0;
+		m_pEntityMngr->SetUseOct(false);
+	}
 	
 	//Update Entity Manager
 	m_pEntityMngr->Update();
@@ -55,8 +65,8 @@ void Application::Display(void)
 	ClearScreen();
 
 	//display octree
-	//m_pRoot->Display();
-	
+	//m_pEntityMngr->GetOctree();
+
 	// draw a skybox
 	m_pMeshMngr->AddSkyboxToRenderList();
 	

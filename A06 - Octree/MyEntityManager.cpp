@@ -6,6 +6,9 @@ void Simplex::MyEntityManager::Init(void)
 {
 	m_uEntityCount = 0;
 	m_mEntityArray = nullptr;
+
+	//Mine
+	tree.Initialize(vector3(-35, -35, -35), vector3(35, 35, 35));
 }
 void Simplex::MyEntityManager::Release(void)
 {
@@ -16,6 +19,10 @@ void Simplex::MyEntityManager::Release(void)
 	}
 	m_uEntityCount = 0;
 	m_mEntityArray = nullptr;
+}
+Octree Simplex::MyEntityManager::GetOctree()
+{
+	return tree;
 }
 Simplex::MyEntityManager* Simplex::MyEntityManager::GetInstance()
 {
@@ -172,6 +179,13 @@ void Simplex::MyEntityManager::Update(void)
 	{
 		m_mEntityArray[i]->ClearCollisionList();
 	}
+
+	if(_useOct)
+	//Refresh addresses
+		for (uint i = 0; i < m_uEntityCount; i++)
+		{
+			m_mEntityArray[i]->SetOctAddress(tree.GetAddress(m_mEntityArray[i]->GetRigidBody()->GetMinGlobal(), m_mEntityArray[i]->GetRigidBody()->GetMaxGlobal()));
+		}
 
 	//check collisions
 	for (uint i = 0; i < m_uEntityCount - 1; i++)
@@ -417,4 +431,14 @@ bool Simplex::MyEntityManager::SharesDimension(String a_sUniqueID, MyEntity* con
 		return pTemp->SharesDimension(a_pOther);
 	}
 	return false;
+}
+
+
+bool Simplex::MyEntityManager::GetUseOct()
+{
+	return _useOct;
+}
+void Simplex::MyEntityManager::SetUseOct(bool val)
+{
+	_useOct = val;
 }
