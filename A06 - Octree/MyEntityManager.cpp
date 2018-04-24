@@ -180,12 +180,18 @@ void Simplex::MyEntityManager::Update(void)
 		m_mEntityArray[i]->ClearCollisionList();
 	}
 
-	if(_useOct)
-	//Refresh addresses
+	if (_useOct)
+	{
+		//Refresh addresses
 		for (uint i = 0; i < m_uEntityCount; i++)
 		{
 			m_mEntityArray[i]->SetOctAddress(tree.GetAddress(m_mEntityArray[i]->GetRigidBody()->GetMinGlobal(), m_mEntityArray[i]->GetRigidBody()->GetMaxGlobal()));
 		}
+	}
+	else {
+		for (uint i = 0; i < m_uEntityCount; i++)
+			m_mEntityArray[i]->SetOctAddress(OctreeAddress());
+	}
 
 	//check collisions
 	for (uint i = 0; i < m_uEntityCount - 1; i++)

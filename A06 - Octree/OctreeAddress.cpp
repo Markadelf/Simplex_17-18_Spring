@@ -1,6 +1,8 @@
 #include "OctreeAddress.h"
 #include <cstring>
+#include "Octree.h"
 
+//Initialize the bitset
 OctreeAddress::OctreeAddress()
 {
 	for (size_t i = 0; i < (depth + 1) / 2; i++)
@@ -15,6 +17,7 @@ OctreeAddress::~OctreeAddress()
 
 }
 
+//Memcopy the bitset
 OctreeAddress & OctreeAddress::operator=(OctreeAddress other)
 {
 	std::memcpy(_address, other._address, (depth + 1) / 2);
@@ -22,6 +25,7 @@ OctreeAddress & OctreeAddress::operator=(OctreeAddress other)
 	return *this;
 }
 
+//Set a coordinate
 bool OctreeAddress::Set(int index, unsigned _int8 state)
 {
 	if(index > depth)
@@ -31,6 +35,18 @@ bool OctreeAddress::Set(int index, unsigned _int8 state)
 	//Wipe the address and override it with the new state
 	_address[index / 2] = (_address[index / 2] & (~masks[index & 1])) | state;
 	return true;
+}
+
+//Fetch a coordinate
+unsigned _int8 OctreeAddress::Get(int index)
+{
+	unsigned _int8 ret = 0;
+	if (index > depth)
+		return 0;
+	ret = _address[index / 2] & masks[index & 1];
+	if (index & 1)
+		ret = ret >> 4;
+	return ret;
 }
 
 //Compares the addresses. Returns true if the addresses are the same or one contains the other
@@ -46,7 +62,9 @@ bool OctreeAddress::Compare(OctreeAddress & other)
 			return true;
 		}
 		else if (a != b)
+		{
 			return false;
+		}
 	}
 	return true;
 }

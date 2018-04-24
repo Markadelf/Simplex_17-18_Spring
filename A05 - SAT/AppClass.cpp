@@ -37,7 +37,7 @@ void Application::Update(void)
 	//Set model matrix to the creeper
 	matrix4 mCreeper = glm::translate(m_v3Creeper) * ToMatrix4(m_qCreeper) * ToMatrix4(m_qArcBall);
 	m_pCreeper->SetModelMatrix(mCreeper);
-	m_pCreeperRB->SetModelMatrix(mCreeper);
+	//m_pCreeperRB->SetModelMatrix(mCreeper);
 	m_pMeshMngr->AddAxisToRenderList(mCreeper);
 
 	//Set model matrix to Steve

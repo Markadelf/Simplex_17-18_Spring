@@ -31,6 +31,7 @@ void Application::InitVariables(void)
 	}
 	m_uOctantLevels = OctreeAddress::depth;
 	m_pEntityMngr->Update();
+	display = true;
 }
 void Application::Update(void)
 {
@@ -43,6 +44,8 @@ void Application::Update(void)
 	//Is the first person camera active?
 	CameraRotation();
 
+
+	//Mine
 	if (m_uOctantLevels >= OctreeAddress::depth || m_uOctantLevels == 1)
 	{
 		m_uOctantLevels = OctreeAddress::depth;
@@ -63,9 +66,12 @@ void Application::Display(void)
 {
 	// Clear the screen
 	ClearScreen();
-
 	//display octree
-	//m_pEntityMngr->GetOctree();
+	if (display) {
+		m_pEntityMngr->GetOctree().Display();
+		m_pEntityMngr->GetOctree().Refresh();
+	}
+	Octree::display = display;
 
 	// draw a skybox
 	m_pMeshMngr->AddSkyboxToRenderList();
